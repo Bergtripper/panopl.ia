@@ -45,7 +45,7 @@
 
 .foundation-grid { position:fixed; inset:0; z-index:0; pointer-events:none; max-width:1600px; margin:auto; padding:0 2rem; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); opacity:1; }
 .foundation-grid i { border-right:1px solid var(--grid); }.foundation-grid i:first-child{border-left:1px solid var(--grid)}
-main, footer, header { position:relative; z-index:1; }
+main, footer { position:relative; z-index:1; }\nheader { z-index:50; }
 
 .dz-logotype,.dz-mark{display:block;overflow:visible;color:currentColor;--dz-logo-red:#F70B0D}.dz-logotype{height:auto;max-width:100%}.dz-mark{flex:none}.dz-brand-lockup{display:inline-flex;align-items:center;color:var(--text);text-decoration:none}
 .dz-brand-state{position:relative;display:flex;align-items:center;height:28px;width:148px;transition:width 220ms cubic-bezier(.2,.8,.2,1)}.dz-brand-state[data-compact='true']{width:24px}.dz-brand-state__item{animation:brand-enter 220ms cubic-bezier(.2,.8,.2,1) both}@keyframes brand-enter{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
