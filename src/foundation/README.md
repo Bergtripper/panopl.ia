@@ -11,6 +11,7 @@ Pinned source commit: `fe86791ec0ceb1514495be9bf5c16030f61767d4`
 - `. / 0 / </>` graphic syntax
 - typography switch and typography state
 - semantic DOTZERO tokens/classes consumed by the app
+- canonical Foundation CSS in `foundation.css`
 - scroll-state identity behaviour used by the PANOPL.IA header
 
 ## PANOPL.IA-owned outside this directory
