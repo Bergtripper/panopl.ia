@@ -19,6 +19,7 @@ const copy = {
     matrix: 'Matrice delle capacità', arsenal: 'Arsenale', recipes: 'Recipe / pipeline', tests: 'Test lab', time: 'Time',
     provisional: 'PROFILI EDITORIALI PROVVISORI — NON BENCHMARK SCIENTIFICI',
     filter: 'Filtra strumenti', all: 'Tutti', open: 'Apri profilo', close: 'Chiudi',
+    task: 'TASK', capability: 'CAPABILITY', tool: 'TOOL / MODEL', evidence: 'EVIDENCE',
   },
   de: {
     eyebrow: 'DOTZERO / PERSONAL RESEARCH LAB / KNOTEN 05',
@@ -28,6 +29,7 @@ const copy = {
     matrix: 'Fähigkeitsmatrix', arsenal: 'Arsenal', recipes: 'Recipes / Pipelines', tests: 'Testlabor', time: 'Zeit',
     provisional: 'VORLÄUFIGE REDAKTIONELLE PROFILE — KEINE WISSENSCHAFTLICHEN BENCHMARKS',
     filter: 'Werkzeuge filtern', all: 'Alle', open: 'Profil öffnen', close: 'Schließen',
+    task: 'AUFGABE', capability: 'FÄHIGKEIT', tool: 'TOOL / MODELL', evidence: 'EVIDENZ',
   },
   en: {
     eyebrow: 'DOTZERO / PERSONAL RESEARCH LAB / NODE 05',
@@ -37,6 +39,7 @@ const copy = {
     matrix: 'Capability matrix', arsenal: 'Arsenal', recipes: 'Recipes / pipelines', tests: 'Test lab', time: 'Time',
     provisional: 'PROVISIONAL EDITORIAL PROFILES — NOT SCIENTIFIC BENCHMARKS',
     filter: 'Filter tools', all: 'All', open: 'Open profile', close: 'Close',
+    task: 'TASK', capability: 'CAPABILITY', tool: 'TOOL / MODEL', evidence: 'EVIDENCE',
   },
 };
 
@@ -52,6 +55,11 @@ const SectionHead = ({ index, title, subtitle }: { index: string; title: string;
     <div><h2>{title}</h2><p>{subtitle}</p></div>
   </div>
 );
+
+const groupProfile = (tool: Tool, group: CapabilityGroup) => {
+  const ids = capabilities.filter((cap) => cap.group === group).map((cap) => cap.id);
+  return Math.max(0, ...ids.map((id) => tool.capabilities[id] ?? 0));
+};
 
 function Panoplia() {
   const [colorMode, setColorMode] = useState<ColorMode>('light');
@@ -76,54 +84,95 @@ function Panoplia() {
       <main>
         <section className="hero-shell">
           <div className="hero-meta">{c.eyebrow}</div>
-          <div className="hero-grid">
+          <div className="hero-grid hero-grid-refined">
             <div className="hero-title-wrap">
               <div className="hero-code">PANOPL<span className="hero-dot">.</span>IA</div>
+              <div className="hero-claim"><span>CAPABILITY</span><span>COMPOSITION</span><span>EVIDENCE</span></div>
               <div className="hero-syntax"><DotMarker size={10} /><FieldGlyph size={18} /><SystemGlyph size={31} /></div>
             </div>
             <div className="hero-copy">
               <p className="hero-strap">{c.strap}</p>
               <h1>{c.lead}</h1>
               <p>{c.intro}</p>
+              <div className="hero-system-map" aria-label="PANOPL.IA system logic">
+                <div><span>01</span><strong>{c.task}</strong></div>
+                <SystemGlyph size={20} />
+                <div><span>02</span><strong>{c.capability}</strong></div>
+                <SystemGlyph size={20} />
+                <div><span>03</span><strong>{c.tool}</strong></div>
+                <SystemGlyph size={20} />
+                <div><span>04</span><strong>RECIPE</strong></div>
+                <SystemGlyph size={20} />
+                <div><span>05</span><strong>{c.evidence}</strong></div>
+              </div>
               <a className="hero-action" href="#capabilities"><span>ENTER SYSTEM</span><SystemGlyph size={25} /></a>
             </div>
           </div>
-          <div className="hero-status"><span>STATUS / V0.1</span><span>MODE / CAPABILITY-FIRST</span><span>OBSERVED / 2026.10</span></div>
+          <div className="hero-status hero-status-refined">
+            <span>STATUS / V0.1</span>
+            <span>{String(capabilities.length).padStart(2, '0')} CAPABILITIES</span>
+            <span>{String(tools.length).padStart(2, '0')} TOOLS</span>
+            <span>{String(recipes.length).padStart(2, '0')} RECIPES</span>
+            <span>{String(tests.length).padStart(2, '0')} TEST PROTOCOLS</span>
+          </div>
         </section>
 
-        <section id="capabilities" className="content-section">
+        <section id="capabilities" className="content-section capabilities-section">
           <SectionHead index="01" title={c.matrix} subtitle="What can be done — before asking which product does it." />
           <div className="group-filter">
             <button onClick={() => setGroup('ALL')} className={group === 'ALL' ? 'is-active' : ''}>{c.all}</button>
             {groups.map((g) => <button key={g} onClick={() => setGroup(g)} className={group === g ? 'is-active' : ''}>{g}</button>)}
           </div>
-          <div className="capability-grid">
-            {visibleCapabilities.map((cap) => (
-              <article key={cap.id} className="capability-card">
-                <div className="capability-top"><span>{cap.code}</span><span>{cap.group}</span></div>
-                <h3>{cap.name}</h3>
-                <p>{cap.description}</p>
-                <div className="capability-tool-count">{tools.filter((tool) => (tool.capabilities[cap.id] ?? 0) > 0).length.toString().padStart(2, '0')} mapped tools</div>
-              </article>
-            ))}
+
+          <div className="capability-matrix" role="table" aria-label={c.matrix}>
+            <div className="capability-matrix-head" role="row">
+              <span>CODE</span><span>FIELD</span><span>CAPABILITY</span><span>FUNCTION</span><span>BEST MAPPED FIT</span><span>COVERAGE</span>
+            </div>
+            {visibleCapabilities.map((cap) => {
+              const mapped = tools
+                .map((tool) => ({ tool, score: tool.capabilities[cap.id] ?? 0 }))
+                .filter((item) => item.score > 0)
+                .sort((a, b) => b.score - a.score);
+              return (
+                <article key={cap.id} className="capability-row" role="row">
+                  <div className="cap-cell cap-code">{cap.code}</div>
+                  <div className="cap-cell cap-group"><DotMarker size={5} />{cap.group}</div>
+                  <div className="cap-cell cap-name">{cap.name}</div>
+                  <div className="cap-cell cap-description">{cap.description}</div>
+                  <div className="cap-cell cap-fit">
+                    {mapped.slice(0, 3).map(({ tool, score }) => <span key={tool.id}>{tool.name}<b>{score}</b></span>)}
+                  </div>
+                  <div className="cap-cell cap-coverage"><strong>{String(mapped.length).padStart(2, '0')}</strong><span>MAPPED</span></div>
+                </article>
+              );
+            })}
           </div>
         </section>
 
-        <section id="arsenal" className="content-section section-invertible">
+        <section id="arsenal" className="content-section section-invertible arsenal-section">
           <SectionHead index="02" title={c.arsenal} subtitle="Tools as capability profiles — not a directory of logos." />
           <div className="arsenal-controls">
             <label className="search-box"><Search size={15} /><span className="sr-only">{c.filter}</span><input value={query} onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)} placeholder={c.filter} /></label>
             <div className="provisional-note">{c.provisional}</div>
           </div>
           <div className="arsenal-table-wrap">
-            <table className="arsenal-table">
-              <thead><tr><th>TOOL</th><th>MAKER</th><th>TYPE</th><th>ACCESS</th><th>COST</th><th>PROFILE</th><th /></tr></thead>
+            <table className="arsenal-table arsenal-table-refined">
+              <thead>
+                <tr><th>TOOL</th><th>TYPE</th><th>ACCESS</th><th colSpan={6}>CAPABILITY RANGE</th><th>DOMINANT</th><th /></tr>
+                <tr className="profile-axis-head"><th /><th /><th />{groups.map((g) => <th key={g}>{g}</th>)}<th /><th /></tr>
+              </thead>
               <tbody>
                 {visibleTools.map((tool) => {
                   const strongest = Object.entries(tool.capabilities).sort((a, b) => b[1] - a[1]).slice(0, 2);
                   return (
                     <tr key={tool.id}>
-                      <td className="tool-name"><DotMarker size={6} />{tool.name}</td><td>{tool.maker}</td><td>{tool.kind}</td><td>{tool.access.join(' · ')}</td><td>{'€'.repeat(tool.price)}</td>
+                      <td className="tool-name"><DotMarker size={6} /><div><strong>{tool.name}</strong><span>{tool.maker}</span></div></td>
+                      <td className="tool-kind">{tool.kind}</td>
+                      <td className="tool-access">{tool.access.join(' · ')}</td>
+                      {groups.map((g) => {
+                        const score = groupProfile(tool, g);
+                        return <td key={g} className="profile-cell"><span className={`profile-meter p-${score}`} title={`${g}: ${score}/5`} /></td>;
+                      })}
                       <td>{strongest.map(([id, score]) => <span className="profile-chip" key={id}>{capabilities.find((cap) => cap.id === id)?.name ?? id} {score}</span>)}</td>
                       <td><button className="open-tool" onClick={() => setSelectedTool(tool)} aria-label={`${c.open}: ${tool.name}`}><ChevronRight size={18} /></button></td>
                     </tr>
@@ -134,19 +183,32 @@ function Panoplia() {
           </div>
         </section>
 
-        <section id="recipes" className="content-section">
-          <SectionHead index="03" title={c.recipes} subtitle="A workflow is a chain of capabilities. Tools are replaceable nodes." />
-          <div className="recipes-stack">
+        <section id="recipes" className="content-section recipes-section">
+          <SectionHead index="03" title={c.recipes} subtitle="The task is stable. Tools are replaceable nodes inside a capability chain." />
+          <div className="recipes-stack recipes-stack-refined">
             {recipes.map((recipe) => (
-              <article className="recipe" key={recipe.id}>
-                <div className="recipe-header"><span>{recipe.code}</span><h3>{recipe.title}</h3><p>{recipe.outcome}</p></div>
+              <article className="recipe recipe-refined" key={recipe.id}>
+                <div className="recipe-header">
+                  <span>{recipe.code}</span>
+                  <h3>{recipe.title}</h3>
+                  <p>{recipe.outcome}</p>
+                  <div className="recipe-meta"><span>{String(recipe.steps.length).padStart(2, '0')} NODES</span><span>OPEN SYSTEM</span></div>
+                </div>
                 <div className="recipe-flow">
-                  {recipe.steps.map((step, i) => (
-                    <div className="recipe-node-wrap" key={`${recipe.id}-${step.label}`}>
-                      <div className="recipe-node"><span className="recipe-node-index">{String(i + 1).padStart(2, '0')}</span><strong>{step.label}</strong><span>{step.preferred}</span><small>{step.alternatives.join(' / ')}</small></div>
-                      {i < recipe.steps.length - 1 && <ArrowRight className="recipe-arrow" size={20} />}
-                    </div>
-                  ))}
+                  {recipe.steps.map((step, i) => {
+                    const cap = capabilities.find((item) => item.id === step.capability);
+                    return (
+                      <div className="recipe-node-wrap" key={`${recipe.id}-${step.label}`}>
+                        <div className="recipe-node">
+                          <div className="recipe-node-top"><span className="recipe-node-index">{String(i + 1).padStart(2, '0')}</span><span className="recipe-capability">{cap?.group} / {cap?.name}</span></div>
+                          <strong>{step.label}</strong>
+                          <span className="recipe-preferred">{step.preferred}</span>
+                          <small>ALT / {step.alternatives.join(' · ')}</small>
+                        </div>
+                        {i < recipe.steps.length - 1 && <ArrowRight className="recipe-arrow" size={20} />}
+                      </div>
+                    );
+                  })}
                 </div>
               </article>
             ))}
